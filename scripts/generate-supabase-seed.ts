@@ -1,0 +1,447 @@
+import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
+import { writeFileSync } from "node:fs";
+
+import { companySeedUniverse } from "../lib/config/company-universe";
+import { valueChainCategories } from "../lib/config/site";
+import { tierOneProductCuration } from "../lib/config/tier-one-curation";
+
+const outputPath = resolve(process.cwd(), "supabase/seed.sql");
+
+const relationshipTypes = [
+  ["Manufactures For", "Manufactured By", "manufactures-for", "Manufacturing", true],
+  ["Supplies To", "Purchases From", "supplies-to", "Supply Chain", true],
+  ["Uses Technology", "Used By", "uses-technology", "Technology", true],
+  ["Owns Product", "Product Owned By", "owns-product", "Product", true],
+  ["Competes With", "Competes With", "competes-with", "Competition", false],
+  ["Partners With", "Partners With", "partners-with", "Partnership", false],
+  ["Cloud Provider For", "Uses Cloud Platform", "cloud-provider-for", "Cloud", true],
+  ["Memory Supplier To", "Uses Memory From", "memory-supplier-to", "Supply Chain", true],
+  ["Networking Provider To", "Uses Networking From", "networking-provider-to", "Supply Chain", true],
+  ["Customer Of", "Sells To", "customer-of", "Customer", true],
+  ["Powers", "Powered By", "powers", "Technology", true],
+  ["Belongs To Category", "Contains Company", "belongs-to-category", "Classification", true],
+] as const;
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function toJsonSql(value: unknown) {
+  return JSON.stringify(value).replaceAll("$seed$", "\\u0024seed\\u0024");
+}
+
+export function buildSeedSql() {
+  const categorySeed = valueChainCategories.map((category, index) => ({
+    description: category.description,
+    display_order: index + 1,
+    icon_name: category.iconName,
+    name: category.name,
+    slug: category.slug,
+  }));
+
+  const companySeed = companySeedUniverse.map((company) => ({
+    ai_role: company.aiFocus,
+    company_name: company.companyName,
+    coverage_tier: company.priority === "tier-1" ? "tier_1" : "baseline",
+    primary_category_slug: company.primaryCategorySlug,
+    slug: slugify(company.companyName),
+    ticker: company.ticker,
+  }));
+
+  const relationshipTypeSeed = relationshipTypes.map(([name, inverseName, slug, displayGroup, isDirectional]) => ({
+    description: `Curated ${name.toLowerCase()} relationship for the AI ecosystem graph.`,
+    display_group: displayGroup,
+    inverse_name: inverseName,
+    is_directional: isDirectional,
+    name,
+    slug,
+  }));
+
+  const productSeed = tierOneProductCuration.map((product) => ({
+    company_ticker: product.companyTicker,
+    product_name: product.productName,
+    product_slug: product.productSlug,
+    product_type: product.productType,
+    source_reference: product.sourceReference,
+    verified_at: product.verifiedAt,
+  }));
+
+  const technologySeed = Array.from(
+    new Map(
+      tierOneProductCuration
+        .flatMap((product) => product.technologies.map((technology) => [technology.slug, {
+          name: technology.name,
+          slug: technology.slug,
+          source_reference: product.sourceReference,
+          technology_type: technology.technologyType,
+          verified_at: product.verifiedAt,
+        }] as const)),
+    ).values(),
+  );
+
+  const companyGraphSlugs = new Map<string, string>(
+    companySeed.map((company) => [company.ticker, `company-${company.slug}`]),
+  );
+
+  function getCompanyGraphSlug(ticker: string) {
+    const slug = companyGraphSlugs.get(ticker);
+
+    if (!slug) {
+      throw new Error(`Tier 1 curation references an unsupported company ticker: ${ticker}`);
+    }
+
+    return slug;
+  }
+
+  const categoryGraphEdgeSeed = companySeed.map((company) => ({
+    relationship_type_slug: "belongs-to-category",
+    source_reference: "AI Stocks Explorer source taxonomy",
+    source_slug: `company-${company.slug}`,
+    target_slug: `category-${company.primary_category_slug}`,
+    verified_at: "2026-07-18T00:00:00.000Z",
+  }));
+
+  const productGraphEdgeSeed = tierOneProductCuration.map((product) => ({
+    relationship_type_slug: "owns-product",
+    source_reference: product.sourceReference,
+    source_slug: getCompanyGraphSlug(product.companyTicker),
+    target_slug: `product-${product.productSlug}`,
+    verified_at: product.verifiedAt,
+  }));
+
+  const technologyGraphEdgeSeed = tierOneProductCuration.flatMap((product) => product.technologies
+    .filter((technology) => !("includeInGraph" in technology && technology.includeInGraph === false))
+    .map((technology) => ({
+      relationship_type_slug: "uses-technology",
+      source_reference: product.sourceReference,
+      source_slug: `product-${product.productSlug}`,
+      target_slug: `technology-${technology.slug}`,
+      verified_at: product.verifiedAt,
+    })));
+
+  const graphEdgeSeed = [
+    ...categoryGraphEdgeSeed,
+    ...productGraphEdgeSeed,
+    ...technologyGraphEdgeSeed,
+  ];
+
+  return `-- Generated by scripts/generate-supabase-seed.ts. Do not edit by hand.
+-- This seed contains the approved category taxonomy, company registry, and relationship vocabulary.
+-- Tier 1 product and technology records use official company source pages. Market prices and financial values are excluded.
+
+begin;
+
+with category_seed as (
+  select *
+  from jsonb_to_recordset($seed$${toJsonSql(categorySeed)}$seed$::jsonb)
+    as seed(name text, slug text, description text, icon_name text, display_order integer)
+)
+insert into public.ai_categories (name, slug, description, icon_name, display_order)
+select name, slug, description, icon_name, display_order
+from category_seed
+on conflict (slug) do update set
+  name = excluded.name,
+  description = excluded.description,
+  icon_name = excluded.icon_name,
+  display_order = excluded.display_order,
+  is_active = true;
+
+with company_seed as (
+  select *
+  from jsonb_to_recordset($seed$${toJsonSql(companySeed)}$seed$::jsonb)
+    as seed(
+      company_name text,
+      ticker text,
+      slug text,
+      primary_category_slug text,
+      ai_role text,
+      coverage_tier text
+    )
+)
+insert into public.companies (
+  company_name,
+  ticker,
+  slug,
+  primary_category_id,
+  ai_role,
+  coverage_tier,
+  source_reference,
+  is_active
+)
+select
+  company_seed.company_name,
+  company_seed.ticker,
+  company_seed.slug,
+  ai_categories.id,
+  company_seed.ai_role,
+  company_seed.coverage_tier,
+  'AI Stocks Explorer source taxonomy',
+  true
+from company_seed
+join public.ai_categories on ai_categories.slug = company_seed.primary_category_slug
+on conflict (ticker) do update set
+  company_name = excluded.company_name,
+  slug = excluded.slug,
+  primary_category_id = excluded.primary_category_id,
+  ai_role = excluded.ai_role,
+  coverage_tier = excluded.coverage_tier,
+  source_reference = excluded.source_reference,
+  is_active = true;
+
+insert into public.company_categories (company_id, category_id, category_type)
+select companies.id, companies.primary_category_id, 'primary'
+from public.companies
+where companies.source_reference = 'AI Stocks Explorer source taxonomy'
+on conflict (company_id, category_id) do update set
+  category_type = excluded.category_type;
+
+with relationship_type_seed as (
+  select *
+  from jsonb_to_recordset($seed$${toJsonSql(relationshipTypeSeed)}$seed$::jsonb)
+    as seed(
+      name text,
+      inverse_name text,
+      slug text,
+      display_group text,
+      is_directional boolean,
+      description text
+    )
+)
+insert into public.relationship_types (
+  name,
+  inverse_name,
+  slug,
+  display_group,
+  is_directional,
+  description,
+  is_active
+)
+select name, inverse_name, slug, display_group, is_directional, description, true
+from relationship_type_seed
+on conflict (slug) do update set
+  name = excluded.name,
+  inverse_name = excluded.inverse_name,
+  display_group = excluded.display_group,
+  is_directional = excluded.is_directional,
+  description = excluded.description,
+  is_active = true;
+
+with product_seed as (
+  select *
+  from jsonb_to_recordset($seed$${toJsonSql(productSeed)}$seed$::jsonb)
+    as seed(
+      company_ticker text,
+      product_name text,
+      product_slug text,
+      product_type text,
+      source_reference text,
+      verified_at timestamptz
+    )
+)
+insert into public.company_products (
+  company_id,
+  product_name,
+  product_slug,
+  product_type,
+  source_reference,
+  last_verified_at,
+  is_active
+)
+select
+  companies.id,
+  product_seed.product_name,
+  product_seed.product_slug,
+  product_seed.product_type,
+  product_seed.source_reference,
+  product_seed.verified_at,
+  true
+from product_seed
+join public.companies on companies.ticker = product_seed.company_ticker
+on conflict (company_id, product_slug) do update set
+  product_name = excluded.product_name,
+  product_type = excluded.product_type,
+  source_reference = excluded.source_reference,
+  last_verified_at = excluded.last_verified_at,
+  is_active = true;
+
+with technology_seed as (
+  select *
+  from jsonb_to_recordset($seed$${toJsonSql(technologySeed)}$seed$::jsonb)
+    as seed(
+      name text,
+      slug text,
+      technology_type text,
+      source_reference text,
+      verified_at timestamptz
+    )
+)
+insert into public.technologies (
+  name,
+  slug,
+  technology_type,
+  source_reference,
+  last_verified_at,
+  is_active
+)
+select
+  name,
+  slug,
+  technology_type,
+  source_reference,
+  verified_at,
+  true
+from technology_seed
+on conflict (slug) do update set
+  name = excluded.name,
+  technology_type = excluded.technology_type,
+  source_reference = excluded.source_reference,
+  last_verified_at = excluded.last_verified_at,
+  is_active = true;
+
+insert into public.knowledge_graph_nodes (
+  node_type,
+  entity_id,
+  name,
+  slug,
+  description,
+  is_active
+)
+select
+  'category',
+  ai_categories.id,
+  ai_categories.name,
+  'category-' || ai_categories.slug,
+  ai_categories.description,
+  true
+from public.ai_categories
+on conflict (node_type, entity_id) do update set
+  name = excluded.name,
+  slug = excluded.slug,
+  description = excluded.description,
+  is_active = true;
+
+insert into public.knowledge_graph_nodes (
+  node_type,
+  entity_id,
+  name,
+  slug,
+  description,
+  is_active
+)
+select
+  'company',
+  companies.id,
+  companies.company_name,
+  'company-' || companies.slug,
+  companies.ai_role,
+  true
+from public.companies
+where companies.source_reference = 'AI Stocks Explorer source taxonomy'
+on conflict (node_type, entity_id) do update set
+  name = excluded.name,
+  slug = excluded.slug,
+  description = excluded.description,
+  is_active = true;
+
+with product_seed as (
+  select *
+  from jsonb_to_recordset($seed$${toJsonSql(productSeed)}$seed$::jsonb)
+    as seed(company_ticker text, product_name text, product_slug text)
+)
+insert into public.knowledge_graph_nodes (
+  node_type,
+  entity_id,
+  name,
+  slug,
+  is_active
+)
+select
+  'product',
+  company_products.id,
+  company_products.product_name,
+  'product-' || company_products.product_slug,
+  true
+from product_seed
+join public.companies on companies.ticker = product_seed.company_ticker
+join public.company_products on company_products.company_id = companies.id
+  and company_products.product_slug = product_seed.product_slug
+on conflict (node_type, entity_id) do update set
+  name = excluded.name,
+  slug = excluded.slug,
+  is_active = true;
+
+with technology_seed as (
+  select *
+  from jsonb_to_recordset($seed$${toJsonSql(technologySeed)}$seed$::jsonb)
+    as seed(name text, slug text)
+)
+insert into public.knowledge_graph_nodes (
+  node_type,
+  entity_id,
+  name,
+  slug,
+  is_active
+)
+select
+  'technology',
+  technologies.id,
+  technologies.name,
+  'technology-' || technologies.slug,
+  true
+from technology_seed
+join public.technologies on technologies.slug = technology_seed.slug
+on conflict (node_type, entity_id) do update set
+  name = excluded.name,
+  slug = excluded.slug,
+  is_active = true;
+
+with graph_edge_seed as (
+  select *
+  from jsonb_to_recordset($seed$${toJsonSql(graphEdgeSeed)}$seed$::jsonb)
+    as seed(
+      source_slug text,
+      target_slug text,
+      relationship_type_slug text,
+      source_reference text,
+      verified_at timestamptz
+    )
+)
+insert into public.knowledge_graph_edges (
+  source_node_id,
+  target_node_id,
+  relationship_type_id,
+  confidence_level,
+  source_reference,
+  last_verified_at,
+  is_active
+)
+select
+  source_node.id,
+  target_node.id,
+  relationship_types.id,
+  'high',
+  graph_edge_seed.source_reference,
+  graph_edge_seed.verified_at,
+  true
+from graph_edge_seed
+join public.knowledge_graph_nodes as source_node on source_node.slug = graph_edge_seed.source_slug
+join public.knowledge_graph_nodes as target_node on target_node.slug = graph_edge_seed.target_slug
+join public.relationship_types on relationship_types.slug = graph_edge_seed.relationship_type_slug
+on conflict (source_node_id, target_node_id, relationship_type_id) do update set
+  confidence_level = excluded.confidence_level,
+  source_reference = excluded.source_reference,
+  last_verified_at = excluded.last_verified_at,
+  is_active = true;
+
+commit;
+`;
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  writeFileSync(outputPath, buildSeedSql(), "utf8");
+  process.stdout.write(`Generated ${outputPath}\n`);
+}

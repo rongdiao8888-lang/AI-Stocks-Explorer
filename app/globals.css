@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --canvas: #f6f7f9;
+  --surface: #ffffff;
+  --surface-muted: #edf1f4;
+  --ink: #17212b;
+  --ink-muted: #5e6a75;
+  --line: #d6dce2;
+  --accent: #1566c5;
+  --accent-strong: #0d4d98;
+  --teal: #087b75;
+  --amber: #b46a12;
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  background: var(--canvas);
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  margin: 0;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  text-underline-offset: 0.2em;
+}
+
+::selection {
+  background: #cde2fb;
+  color: var(--ink);
+}
