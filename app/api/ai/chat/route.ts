@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { ZodError } from "zod";
 
 import { AssistantChatError, cacheCompanyAssistantAnswer, maximumAssistantAnswerLength, prepareCompanyAssistantAnswer } from "@/lib/ai/chat-service";
@@ -20,9 +22,9 @@ function createErrorResponse(message: string, status: number, code: string, retr
 
 function getRequestRateLimitKey(request: Request) {
   const forwardedFor = request.headers.get("x-forwarded-for");
-  const address = forwardedFor?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "anonymous";
+  const address = (forwardedFor?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "anonymous").slice(0, 256);
 
-  return `assistant:${address}`;
+  return `assistant:${createHash("sha256").update(address).digest("hex")}`;
 }
 
 export async function POST(request: Request) {

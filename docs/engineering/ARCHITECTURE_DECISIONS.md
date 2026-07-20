@@ -59,6 +59,18 @@ Track major technical decisions for AI Stocks Explorer.
 
 **Outcome:** The hackathon renders a `Price` action that opens the supported ticker on Yahoo Finance. The application does not fetch, display, cache, or persist market prices, historical prices, or financial metrics. A future provider integration requires a new architecture decision and approved rights. See `MARKET_DATA_CONTRACT.md`.
 
+### AD-006: Use Supabase for shared GPT assistant request limits
+
+**Context:** The original assistant request limit lived in server memory. That works during local development but resets across serverless instances and cannot protect a public Vercel deployment consistently.
+
+**Options Considered:**
+
+* Keep the in-process limiter for deployment.
+* Add Redis or another dedicated rate-limit service.
+* Use a private Supabase table and an atomic PostgreSQL function.
+
+**Outcome:** Use a service-role-only Supabase table and `consume_ai_assistant_rate_limit` function. The function serializes consumption for each hashed client key, preserves the eight-request-per-ten-minute policy, reports the retry time, and removes stale windows after 24 hours. This adds no new provider or dependency and keeps all public assistant requests behind the existing server-only boundary.
+
 ## Template
 
 ### Decision

@@ -136,37 +136,41 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
         <div className="py-8">
           <AIResearchDisclaimer />
         </div>
-        <section className="border-b border-line py-8">
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink-muted">Verified products</p>
-          <div className="mt-5 divide-y divide-line border-y border-line">
-            {products.length > 0 ? products.map((product) => (
-              <div className="flex items-start justify-between gap-4 py-4" key={product.name}>
-                <div>
-                  <p className="text-sm font-semibold text-ink">{product.name}</p>
-                  <p className="mt-1 text-sm text-ink-muted">{product.productType}</p>
+        {products.length > 0 ? (
+          <section className="border-b border-line py-8">
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink-muted">Verified products</p>
+            <div className="mt-5 divide-y divide-line border-y border-line">
+              {products.map((product) => (
+                <div className="flex items-start justify-between gap-4 py-4" key={product.name}>
+                  <div>
+                    <p className="text-sm font-semibold text-ink">{product.name}</p>
+                    <p className="mt-1 text-sm text-ink-muted">{product.productType}</p>
+                  </div>
+                  {product.sourceReference?.startsWith("https://") ? <a className="shrink-0 text-sm font-medium text-accent hover:text-accent-strong" href={product.sourceReference} rel="noreferrer" target="_blank">Source</a> : null}
                 </div>
-                {product.sourceReference?.startsWith("https://") ? <a className="shrink-0 text-sm font-medium text-accent hover:text-accent-strong" href={product.sourceReference} rel="noreferrer" target="_blank">Source</a> : null}
-              </div>
-            )) : <p className="py-4 text-sm leading-6 text-ink-muted">No verified products are available for this company yet.</p>}
-          </div>
-        </section>
-        <section className="py-8">
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink-muted">Knowledge graph</p>
-          <div className="mt-5 divide-y divide-line border-y border-line">
-            {graph.edges.length > 0 ? graph.edges.map((edge) => {
-              const source = graphNodesById.get(edge.sourceNodeId);
-              const target = graphNodesById.get(edge.targetNodeId);
+              ))}
+            </div>
+          </section>
+        ) : null}
+        {graph.edges.length > 0 ? (
+          <section className="py-8">
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink-muted">Knowledge graph</p>
+            <div className="mt-5 divide-y divide-line border-y border-line">
+              {graph.edges.map((edge) => {
+                const source = graphNodesById.get(edge.sourceNodeId);
+                const target = graphNodesById.get(edge.targetNodeId);
 
-              return (
-                <div className="grid gap-2 py-4 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center" key={edge.id}>
-                  <p className="text-sm font-semibold text-ink">{source?.name ?? "Unknown node"}</p>
-                  <p className="font-mono text-xs uppercase tracking-[0.08em] text-teal">{edge.relationshipType}</p>
-                  <p className="text-sm font-semibold text-ink sm:text-right">{target?.name ?? "Unknown node"}</p>
-                </div>
-              );
-            }) : <p className="py-4 text-sm leading-6 text-ink-muted">No high-confidence ecosystem relationships are available for this company yet.</p>}
-          </div>
-        </section>
+                return (
+                  <div className="grid gap-2 py-4 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center" key={edge.id}>
+                    <p className="text-sm font-semibold text-ink">{source?.name ?? "Unknown node"}</p>
+                    <p className="font-mono text-xs uppercase tracking-[0.08em] text-teal">{edge.relationshipType}</p>
+                    <p className="text-sm font-semibold text-ink sm:text-right">{target?.name ?? "Unknown node"}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
         <AIChatPanel companyName={company.name} ticker={company.ticker} />
         <RelatedCompanies categoryName={company.primaryCategory} companies={relatedCompanies} />
       </div>

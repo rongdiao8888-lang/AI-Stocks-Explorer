@@ -3,16 +3,22 @@
 @tailwind utilities;
 
 :root {
-  --canvas: #f6f7f9;
-  --surface: #ffffff;
-  --surface-muted: #edf1f4;
-  --ink: #17212b;
-  --ink-muted: #5e6a75;
-  --line: #d6dce2;
-  --accent: #1566c5;
-  --accent-strong: #0d4d98;
-  --teal: #087b75;
-  --amber: #b46a12;
+  --canvas: #f7e5c8;
+  --surface: #fffaf0;
+  --surface-raised: #fff7ea;
+  --surface-muted: #f6dfc2;
+  --surface-tint: #f0d6b6;
+  --insight-surface: #fff1dc;
+  --insight-line: #efc8b4;
+  --ink: #542d22;
+  --ink-muted: #725d55;
+  --line: #e5c09f;
+  --accent: #bd5937;
+  --accent-strong: #8f412b;
+  --teal: #9d4b30;
+  --amber: #c85a34;
+  --coral: #df673c;
+  --coral-strong: #a8412c;
   --font-sans: Arial, Helvetica, sans-serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
@@ -46,6 +52,6 @@ a {
 }
 
 ::selection {
-  background: #cde2fb;
+  background: #f7cfa8;
   color: var(--ink);
 }

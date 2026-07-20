@@ -16,7 +16,11 @@ const config: Config = {
       colors: {
         canvas: "var(--canvas)",
         surface: "var(--surface)",
+        "surface-raised": "var(--surface-raised)",
         "surface-muted": "var(--surface-muted)",
+        "surface-tint": "var(--surface-tint)",
+        "insight-surface": "var(--insight-surface)",
+        "insight-line": "var(--insight-line)",
         ink: "var(--ink)",
         "ink-muted": "var(--ink-muted)",
         line: "var(--line)",
@@ -24,6 +28,8 @@ const config: Config = {
         "accent-strong": "var(--accent-strong)",
         teal: "var(--teal)",
         amber: "var(--amber)",
+        coral: "var(--coral)",
+        "coral-strong": "var(--coral-strong)",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],

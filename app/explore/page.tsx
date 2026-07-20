@@ -51,13 +51,16 @@ export default async function ExplorePage() {
   }
 
   return (
-    <section className="border-b border-line bg-surface py-14 sm:py-16">
+    <section className="border-b border-line bg-canvas py-14 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <p className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-accent">Explore</p>
-        <h1 className="mt-4 border-b border-line pb-7 text-3xl font-semibold text-ink sm:text-4xl">AI value chain</h1>
-        <div className="mt-8 grid gap-px overflow-hidden border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-4 border-b border-line pb-7">
+          <h1 className="text-3xl font-semibold text-ink sm:text-4xl">Explore the AI value chain</h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-ink-muted">Start with a function in the AI economy, then follow the companies and relationships behind it.</p>
+        </div>
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((category) => (
-            <Link className="group flex min-h-36 flex-col justify-between bg-surface p-5 transition-colors hover:bg-surface-muted" href={`/categories/${category.slug}`} key={category.id}>
+            <Link className="group flex min-h-40 flex-col justify-between border border-line bg-surface-raised p-5 transition-colors hover:border-accent hover:bg-surface" href={`/categories/${category.slug}`} key={category.id}>
               <div>
                 <h2 className="text-sm font-semibold text-ink group-hover:text-accent">{category.name}</h2>
                 <p className="mt-2 text-sm leading-5 text-ink-muted">{category.description}</p>

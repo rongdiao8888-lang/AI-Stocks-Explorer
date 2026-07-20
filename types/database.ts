@@ -234,10 +234,19 @@ export type AIPromptCacheRow = {
   response_text: string;
 };
 
+export type AIAssistantRateLimitRow = {
+  created_at: string;
+  rate_limit_key: string;
+  request_count: number;
+  updated_at: string;
+  window_started_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
       ai_categories: TableDefinition<AICategoryRow, "description" | "display_order" | "icon_name" | "name" | "slug">;
+      ai_assistant_rate_limits: TableDefinition<AIAssistantRateLimitRow, "rate_limit_key" | "request_count" | "window_started_at">;
       ai_prompt_cache: TableDefinition<AIPromptCacheRow, "company_id" | "context_version" | "model_name" | "normalized_question" | "prompt_hash" | "response_text">;
       companies: TableDefinition<CompanyRow, "company_name" | "primary_category_id" | "slug" | "ticker">;
       company_ai_research: TableDefinition<CompanyAIResearchRow, "ai_ecosystem_score" | "company_id" | "competitive_landscape" | "customer_exposure_summary" | "generated_at" | "model_name" | "prompt_version" | "risk_summary" | "score_explanation" | "source_data_version" | "technology_position" | "value_chain_role" | "why_it_matters">;
@@ -253,7 +262,19 @@ export type Database = {
       technologies: TableDefinition<TechnologyRow, "name" | "slug" | "technology_type">;
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      consume_ai_assistant_rate_limit: {
+        Args: {
+          p_maximum_requests: number;
+          p_rate_limit_key: string;
+          p_window_seconds: number;
+        };
+        Returns: Array<{
+          allowed: boolean;
+          retry_after_seconds: number;
+        }>;
+      };
+    };
     Enums: {
       ai_review_status: AIReviewStatus;
       category_assignment_type: CategoryAssignmentType;

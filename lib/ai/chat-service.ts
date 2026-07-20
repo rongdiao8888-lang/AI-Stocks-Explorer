@@ -4,10 +4,10 @@ import OpenAI from "openai";
 import { z } from "zod";
 
 import { isPromptInjectionAttempt, assistantChatRequestSchema, normalizeAssistantQuestion } from "@/lib/ai/chat-input";
-import { consumeAssistantRequest } from "@/lib/ai/chat-rate-limit";
 import { getOpenAIConfig } from "@/lib/ai/config";
 import { getApprovedCompanyResearchContext } from "@/lib/ai/context-builder";
 import { buildCompanyAssistantPrompt } from "@/lib/ai/prompts";
+import { consumeAssistantRequest } from "@/lib/repositories/ai-assistant-rate-limit-repository";
 import { createAssistantPromptHash, getCachedAssistantAnswer, storeCachedAssistantAnswer, type AssistantAnswerCacheKey } from "@/lib/repositories/ai-chat-repository";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -98,7 +98,7 @@ export async function prepareCompanyAssistantAnswer(input: unknown, rateLimitKey
     return { answer: cached.answer, cached: true, companyName: approvedContext.company.name };
   }
 
-  const rateLimit = consumeAssistantRequest(rateLimitKey);
+  const rateLimit = await consumeAssistantRequest(rateLimitKey);
 
   if (!rateLimit.allowed) {
     throw new AssistantChatError(

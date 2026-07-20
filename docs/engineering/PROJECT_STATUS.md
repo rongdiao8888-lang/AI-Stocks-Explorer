@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Milestone 3 - Live Discovery Data Verified; Milestone 5 - Curated AI Research Complete; Milestone 7 - GPT Research Assistant Complete
+Milestone 3 - Live Discovery Data Verified; Milestone 5 - Curated AI Research Complete; Milestone 7 - GPT Research Assistant Complete; Public Deployment Preparation Complete
 
 ## Completed
 
@@ -61,15 +61,20 @@ Milestone 3 - Live Discovery Data Verified; Milestone 5 - Curated AI Research Co
 - GPT Research Assistant with company-scoped approved context, streaming responses, suggested questions, input validation, prompt-injection rejection, rate limiting, and seven-day cached answers
 - Live assistant verification for NVIDIA: streamed grounded response, cache hit on a repeated question, and blocked instruction-override request
 - NVIDIA research page and assistant-panel validation at desktop and mobile viewports
+- Refreshed the research-workspace visual system with the supplied AI Stocks Explorer logo, differentiated fact and AI-research surfaces, and a category-grouped AI Stocks List directory
+- Added an AI Stocks List quick-browse dialog with simple category-grouped company and ticker links to company research pages
+- Shared Supabase-backed assistant rate limit with atomic request consumption, server-only access, hashed client keys, and 24-hour stale-window cleanup
+- Hosted assistant rate-limit verification: eight requests allowed and the ninth request rejected with a retry time
+- Representative approved company-research route validation across all 10 categories: NVIDIA, ASML, Micron, Arista Networks, Microsoft, Snowflake, Palantir, Palo Alto Networks, ABB, and Tesla
 
 ## In Progress
 
-Cross-device research-page validation across the remaining company categories
+Production deployment setup
 
 ## Next Tasks
 
-1. Validate representative approved company research pages across all 10 categories at desktop and mobile viewports.
-2. Replace the in-process assistant rate limiter with a shared store before multi-instance public deployment.
+1. Create a Vercel project from the connected GitHub repository and configure the approved environment variables there.
+2. Verify the deployed application, Supabase reads, external Price links, and assistant rate limit on the public URL.
 3. Use `npm run ai:generate -- <TICKER> --regenerate` only when a current approved record needs a deliberately reviewed replacement.
 
 ## Technical Debt
@@ -78,7 +83,7 @@ Cross-device research-page validation across the remaining company categories
 - Market prices, financial values, AI content, and company-to-company graph edges remain intentionally unseeded until their sources are verified.
 - The current Tier 1 curation meets the 50-record MVP target with 23 products and 27 technologies; broader issuer coverage remains a future enrichment task.
 - `PART_3_UX.md` is the documented UX equivalent, while some engineering documents reference `PART_3_UX_AND_INTERFACE_DESIGN.md`.
-- The GPT assistant's rate limit is intentionally in-process for the local hackathon environment; use a shared rate-limit store before a multi-instance deployment.
+- Assistant rate-limit windows are cleaned up on the next uncached assistant request after 24 hours; a scheduled cleanup is unnecessary at hackathon traffic levels.
 
 ## Decisions Made
 
@@ -91,10 +96,11 @@ Cross-device research-page validation across the remaining company categories
 - AI generation writes drafts only. Public company pages continue to show only approved, unexpired records through Row Level Security.
 - Public AI research must match the current approved context version. A source-data update hides stale research until a new draft is reviewed and approved.
 - Structured thesis and research generation remain local and review-gated. The public GPT assistant uses a narrow company-scoped endpoint with input validation, instruction-override rejection, request limits, and cached answers to protect the OpenAI budget.
+- The GPT assistant request limit is enforced by a service-role-only Supabase function so it remains consistent across server instances during a public Vercel deployment.
 
 ## Deployment
 
-Local development server verified. Public Vercel deployment is not started.
+Local development server and hosted Supabase verified. GitHub is connected. Public Vercel deployment is not started.
 
 ## Known Issues
 
@@ -104,5 +110,4 @@ Local development server verified. Public Vercel deployment is not started.
 
 ## Demo Readiness
 
-The generated seed, repositories, external-price-link contract, discovery routes, approved AI research, and company-scoped GPT assistant are live against the verified hosted Supabase project for all 64 curated companies.
-None
+The generated seed, repositories, external-price-link contract, discovery routes, approved AI research, shared assistant rate limiter, and company-scoped GPT assistant are live against the verified hosted Supabase project for all 64 curated companies. The project is ready for Vercel deployment.

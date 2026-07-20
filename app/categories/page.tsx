@@ -43,7 +43,7 @@ export default async function CategoriesPage() {
   const categories = await listActiveCategories();
 
   return (
-    <section className="border-b border-line bg-surface py-14 sm:py-16">
+    <section className="border-b border-line bg-[#f7e5c8] py-14 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <p className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-accent">Categories</p>
         <h1 className="mt-4 border-b border-line pb-7 text-3xl font-semibold text-ink sm:text-4xl">AI value-chain categories</h1>

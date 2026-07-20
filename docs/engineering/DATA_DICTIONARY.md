@@ -24,6 +24,10 @@ The planned depth of research for a company. Tier 1 companies receive the comple
 
 An external Yahoo Finance quote-page URL derived from a supported company ticker. The hackathon application does not retrieve, store, or display the linked market data.
 
+### Assistant Request Limit
+
+A server-private count of uncached GPT Research Assistant requests. The database stores a SHA-256 hash of the request address, never the address itself. The limit is eight requests per ten-minute window; the Supabase function atomically allows or rejects each request and returns the remaining wait time when the limit is reached. Stale windows are removed after 24 hours on a later uncached request.
+
 ### Product
 
 An AI-relevant product or platform associated with a company. The first 23 Tier 1 products are backed by official company source pages and appear as Knowledge Graph nodes.

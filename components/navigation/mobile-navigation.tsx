@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 
+import { AIStocksListDialog } from "@/components/companies/ai-stocks-list-dialog";
 import { siteNavigation } from "@/lib/config/site";
 import { cn } from "@/lib/utils";
 
@@ -30,17 +31,31 @@ export function MobileNavigation({ pathname }: MobileNavigationProps) {
       {isOpen ? (
         <nav
           aria-label="Mobile primary navigation"
-          className="absolute inset-x-4 top-[4.75rem] z-50 border border-line bg-surface p-2 shadow-[0_18px_45px_rgba(29,36,46,0.13)]"
+          className="absolute inset-x-4 top-[4.75rem] z-50 border border-line bg-surface p-2 shadow-[0_18px_45px_rgba(91,56,39,0.13)]"
           id="mobile-primary-navigation"
         >
           {siteNavigation.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
+            if (item.href === "/companies") {
+              return (
+                <AIStocksListDialog
+                  key={item.href}
+                  onOpen={() => setIsOpen(false)}
+                  showIcon={false}
+                  triggerClassName={cn(
+                    "block w-full rounded-sm px-3 py-3 text-left text-sm font-medium",
+                    isActive ? "bg-surface-tint text-accent-strong" : "text-ink-muted hover:bg-surface-muted hover:text-ink",
+                  )}
+                />
+              );
+            }
+
             return (
               <Link
                 className={cn(
                   "block rounded-sm px-3 py-3 text-sm font-medium",
-                  isActive ? "bg-surface-muted text-ink" : "text-ink-muted hover:bg-surface-muted hover:text-ink",
+                  isActive ? "bg-surface-tint text-accent-strong" : "text-ink-muted hover:bg-surface-muted hover:text-ink",
                 )}
                 href={item.href}
                 key={item.href}

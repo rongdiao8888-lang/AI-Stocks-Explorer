@@ -48,7 +48,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const companies = await listCompanies({ categorySlug: category.slug, limit: 100 });
 
   return (
-    <section className="border-b border-line bg-surface py-14 sm:py-16">
+    <section className="border-b border-line bg-[#f7e5c8] py-14 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:text-accent-strong" href="/categories">
           <ArrowLeft aria-hidden="true" size={16} />

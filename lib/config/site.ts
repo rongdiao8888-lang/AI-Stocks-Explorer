@@ -41,10 +41,8 @@ export type ValueChainCategory = {
 
 export const siteNavigation: NavigationItem[] = [
   { href: "/explore", label: "Explore" },
-  { href: "/categories", label: "Categories" },
-  { href: "/companies", label: "Companies" },
+  { href: "/companies", label: "AI Stocks List" },
   { href: "/ecosystem", label: "Ecosystem" },
-  { href: "/compare", label: "Compare" },
 ];
 
 export const valueChainCategories: ValueChainCategory[] = [

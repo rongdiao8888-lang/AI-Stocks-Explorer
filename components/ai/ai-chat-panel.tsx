@@ -17,7 +17,7 @@ function getSuggestedQuestions(companyName: string) {
   return [
     `What is ${companyName}'s role in the AI value chain?`,
     "What facts support its AI ecosystem position?",
-    "What information is unavailable in the current research context?",
+    "What does the current company research cover?",
   ];
 }
 
@@ -106,9 +106,9 @@ export function AIChatPanel({ companyName, ticker }: AIChatPanelProps) {
   }
 
   return (
-    <section className="border-b border-line py-8" aria-labelledby="research-assistant-heading">
+    <section className="border-b border-line bg-surface-tint px-5 py-8 sm:px-6" aria-labelledby="research-assistant-heading">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between">
-        <p className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink-muted" id="research-assistant-heading">GPT research assistant</p>
+        <p className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-accent-strong" id="research-assistant-heading">GPT research assistant</p>
         <p className="font-mono text-xs uppercase tracking-[0.08em] text-teal">Company-scoped</p>
       </div>
 
