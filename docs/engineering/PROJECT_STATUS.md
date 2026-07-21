@@ -36,7 +36,7 @@ Milestone 3 - Live Discovery Data Verified; Milestone 5 - Curated AI Research Co
 - Server-only OpenAI structured generation with strict JSON schemas and one validation retry
 - Versioned 30-day AI cache lookup and draft persistence through the Supabase service-role client
 - Local draft-generation, review, approval, and credentials-verification commands
-- Verified Supabase server access and OpenAI `gpt-5-mini` model access with rotated credentials
+- Verified Supabase server access and OpenAI model access with rotated credentials
 - Corrected NVIDIA's source role from `Networking` to `AI Compute & GPU Acceleration`
 - Context-version freshness guard verified: stale approved NVIDIA research is hidden pending regeneration
 - Advanced Micro Devices thesis and ecosystem research generated, reviewed, approved, and verified live

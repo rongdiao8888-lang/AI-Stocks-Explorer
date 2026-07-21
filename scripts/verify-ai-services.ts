@@ -5,7 +5,7 @@ import { z } from "zod";
 
 const configSchema = z.object({
   openAIKey: z.string().trim().min(1),
-  openAIModel: z.string().trim().min(1).default("gpt-5-mini"),
+  openAIModel: z.string().trim().min(1).default("gpt-5.6"),
   supabaseServiceRoleKey: z.string().trim().min(1),
   supabaseUrl: z.string().url(),
 });

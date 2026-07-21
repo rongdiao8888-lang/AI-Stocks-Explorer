@@ -4,7 +4,7 @@ import { z } from "zod";
 
 const openAIConfigSchema = z.object({
   apiKey: z.string().trim().min(1),
-  model: z.string().trim().min(1).default("gpt-5-mini"),
+  model: z.string().trim().min(1).default("gpt-5.6"),
 });
 
 export type OpenAIConfig = z.infer<typeof openAIConfigSchema>;
