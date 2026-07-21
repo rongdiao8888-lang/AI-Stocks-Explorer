@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     template: "%s | AI Stocks Explorer",
   },
   description: "Structured research for public companies powering the AI economy.",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
