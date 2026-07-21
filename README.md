@@ -6,6 +6,20 @@ AI Stocks Explorer is a research-focused web application for understanding publi
 
 Milestone 2 has the versioned Supabase schema, deterministic seed workflow, and a verified graph layer. The seed contains the canonical 10-category taxonomy, 64 public companies, 23 Tier 1 product records, 27 technology records, and 120 high-confidence graph edges. Market prices, financial metrics, and unsupported company-to-company relationships remain absent by design.
 
+## Built with Codex and GPT-5.6
+
+### How GPT-5.6 is used
+
+AI Stocks Explorer uses OpenAI GPT-5.6 as the default model for its company-scoped research assistant. The assistant receives an approved, structured company context that includes verified products, AI roles, reviewed research, and high-confidence ecosystem relationships. It uses that context to answer research questions about a specific company while keeping the response grounded in the curated record.
+
+The GPT-5.6 integration is server-only and includes prompt-injection checks, streaming responses, response caching, and rate limiting. It is designed to help users understand the AI ecosystem, not to provide personalized investment advice.
+
+### How Codex accelerated the build
+
+Codex was the engineering partner used throughout the project. It helped translate the product documentation into an implementation plan; build the Next.js and TypeScript application; connect Supabase; create the deterministic seed and knowledge-graph workflow; implement the GPT-5.6 research experience; add tests and validation; refine the UI; and prepare the GitHub and Vercel deployment workflow.
+
+This collaboration made it possible to iterate quickly while keeping the application structured, testable, and focused on transparent research boundaries.
+
 ## Requirements
 
 * Node.js 22 or later
